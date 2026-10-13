@@ -151,7 +151,7 @@ def scan(snapshot, state, now):
                 f"角色：{candidate['role']}；前一日连板：{candidate['streak']}板\n"
                 f"现价：{quote['price']:.2f}；成交均价（VWAP）：{quote['vwap']:.2f}；"
                 f"涨停价：{quote['upper']:.2f}\n"
-                f"均价条件：{('首次有效快照已在VWAP上方（可能在两轮扫描间完成上穿）' if previous is None else '实时价由VWAP下方上穿')}\\n"
+                f"均价条件：{('首次有效快照已在VWAP上方（可能在两轮扫描间完成上穿）' if previous is None else '实时价由VWAP下方上穿')}\n"
                 f"状态：{stage}。此提醒不是下单指令，也不保证成交。"
             )
             if push_once(state, key, f"S19 均价上穿｜{candidate['name']}", body):
