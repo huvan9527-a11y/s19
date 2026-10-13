@@ -81,6 +81,7 @@ def watchlist_push(snapshot, state, now):
             f"原始涨停池：{snapshot['raw_count']} 只\n"
             f"识别题材：{audit['themes_seen']} 个；达宽度条件：{audit['strong_themes']} 个\n"
             f"连板/龙头候选：{audit['candidate_roles_before_acceptance']} 只\n"
+            f"连板门槛淘汰：{audit['streak_rejected']}\n"
             f"承接筛选淘汰：{audit['acceptance_rejected']}\n"
             "最终候选：0。数据请求成功、日期有效；本次为空由以上筛选结果产生。"
         )
