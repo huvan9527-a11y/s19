@@ -1,0 +1,15 @@
+{
+  "timezone": "Asia/Shanghai",
+  "monitor_start": "09:15",
+  "entry_start": "09:30",
+  "scan_end": "10:57",
+  "scan_interval_seconds": 5,
+  "max_quote_age_seconds": 15,
+  "request_timeout_seconds": 12,
+  "min_theme_sealed": 4,
+  "min_streak": 2,
+  "top_n": 3,
+  "allow_second": true,
+  "max_give": 0.05,
+  "limit_price_epsilon": 0.005
+}
