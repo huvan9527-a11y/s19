@@ -39,7 +39,6 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            state/push_state.json
             state/signal_state.json
             state/premarket_candidates.json
           key: s19-${{ steps.day.outputs.date }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -57,7 +56,6 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            state/push_state.json
             state/signal_state.json
             state/premarket_candidates.json
           key: s19-${{ steps.day.outputs.date }}-${{ github.run_id }}-${{ github.run_attempt }}
