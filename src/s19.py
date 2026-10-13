@@ -330,12 +330,16 @@ def send_push(title: str, body: str) -> None:
     key = os.getenv("SERVERCHAN_SENDKEY", "").strip()
     if not key:
         raise RuntimeError("SERVERCHAN_SENDKEY missing")
-    response = requests.post(
-        f"https://sctapi.ftqq.com/{key}.send",
-        data={"title": title[:32], "desp": body},
-        timeout=15,
-    )
-    response.raise_for_status()
-    payload = response.json()
+    try:
+        response = requests.post(
+            f"https://sctapi.ftqq.com/{key}.send",
+            data={"title": title[:32], "desp": body},
+            timeout=15,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except Exception as exc:
+        # The request URL contains the secret; never expose exception text in logs.
+        raise RuntimeError(f"notification transport failed: {type(exc).__name__}") from None
     if not isinstance(payload, dict) or payload.get("code") != 0:
         raise RuntimeError("Server酱 rejected the notification")
