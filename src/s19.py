@@ -204,28 +204,48 @@ def select_s19(rows: list[dict]) -> tuple[list[dict], dict]:
         for theme in stock["themes"]:
             themes[theme].append(stock)
 
+    theme_stats = {
+        theme: {
+            "members": len(members),
+            "sealed": sum(stock["sealed"] for stock in members),
+        }
+        for theme, members in themes.items()
+    }
     strong = {
         theme: members for theme, members in themes.items()
-        if sum(stock["sealed"] for stock in members) >= int(CFG["min_theme_sealed"])
+        if theme_stats[theme]["sealed"] >= int(CFG["min_theme_sealed"])
     }
     candidates, audit = [], {
         "normalized_rows": len(normalized),
         "themes_seen": len(themes),
+        "theme_stats": theme_stats,
         "strong_themes": len(strong),
         "candidate_roles_before_acceptance": 0,
-        "acceptance_rejected": {},
+        "streak_rejected": [],
+        "acceptance_rejected": [],
         "selected": [],
     }
     ranked = []
     for theme, members in strong.items():
         members = sorted(members, key=lambda stock: (-stock["streak"], stock["first"] or "999999"))
-        sealed_count = sum(stock["sealed"] for stock in members)
+        sealed_count = theme_stats[theme]["sealed"]
         if members and members[0]["streak"] >= int(CFG["min_streak"]):
             ranked.append((theme, members[0], "龙头", sealed_count))
+        elif members:
+            audit["streak_rejected"].append({
+                "code": members[0]["code"], "theme": theme,
+                "streak": members[0]["streak"], "required": int(CFG["min_streak"]),
+            })
         if CFG["allow_second"] and len(members) >= 2:
             second = members[1]
-            if second["streak"] >= max(2, int(CFG["min_streak"]) - 1):
+            required = max(2, int(CFG["min_streak"]) - 1)
+            if second["streak"] >= required:
                 ranked.append((theme, second, "二龙头", sealed_count))
+            else:
+                audit["streak_rejected"].append({
+                    "code": second["code"], "theme": theme,
+                    "streak": second["streak"], "required": required,
+                })
 
     ranked.sort(key=lambda item: (-item[3], -item[1]["streak"], item[1]["first"] or "999999"))
     audit["candidate_roles_before_acceptance"] = len(ranked)
@@ -237,7 +257,9 @@ def select_s19(rows: list[dict]) -> tuple[list[dict], dict]:
             continue
         accepted, reason = acceptance(stock)
         if not accepted:
-            audit["acceptance_rejected"][reason] = audit["acceptance_rejected"].get(reason, 0) + 1
+            audit["acceptance_rejected"].append({
+                "code": stock["code"], "theme": theme, "role": role, "reason": reason,
+            })
             continue
         item = {
             "theme": theme, "role": role, "theme_sealed": sealed_count,
@@ -249,7 +271,6 @@ def select_s19(rows: list[dict]) -> tuple[list[dict], dict]:
     audit["candidate_count"] = len(candidates)
     audit["weak_themes"] = len(themes) - len(strong)
     return candidates, audit
-
 
 def quote(code: str):
     market = "sh" if code.startswith(("6", "9")) else "sz"
