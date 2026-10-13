@@ -67,6 +67,25 @@ def prepare_pool(now):
         f"strong_themes={audit['strong_themes']} candidates={len(candidates)}",
         flush=True,
     )
+    theme_counts = sorted(
+        audit.get("theme_stats", {}).items(),
+        key=lambda item: (-item[1]["sealed"], -item[1]["members"], item[0]),
+    )
+    print(
+        "PREMARKET_POOL_AUDIT "
+        + json.dumps({
+            "normalized_rows": audit.get("normalized_rows"),
+            "themes_seen": audit.get("themes_seen"),
+            "weak_themes": audit.get("weak_themes"),
+            "top_themes_sealed_members": [
+                {"theme": theme, **counts} for theme, counts in theme_counts[:12]
+            ],
+            "candidate_roles_before_acceptance": audit.get("candidate_roles_before_acceptance"),
+            "streak_rejected": audit.get("streak_rejected"),
+            "acceptance_rejected": audit.get("acceptance_rejected"),
+        }, ensure_ascii=False),
+        flush=True,
+    )
     return snapshot
 
 
